@@ -2,19 +2,24 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'; // For forecast tabs
 import PhotoGalleryScreen from './screens/PhotoGalleryScreen';
 import PhotoDetailScreen from './screens/PhotoDetailScreen'; // Import the PhotoDetail screen
 import PhotoModalScreen from './screens/PhotoModalScreen'; // Import the PhotoModal screen
-import WeatherAppScreen from './screens/WeatherAppScreen'; // Placeholder for the Weather app
+import CurrentWeatherScreen from './screens/CurrentWeatherScreen'; // For current weather
+import ForecastScreen from './screens/ForecastScreen'; // For forecast tabs
 
 export type RootStackParamList = {
   PhotoGallery: undefined;
   PhotoDetail: { id: number; url: string };
   PhotoModal: { url: string };
   WeatherApp: undefined;
+  CurrentWeather: undefined;
+  Forecast: undefined;
+  ForecastTab: { days: number };
 };
 
-// Create the Stack Navigator
+// Create the Stack Navigator for Photo Gallery
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // Main stack for Photo Gallery, including PhotoDetail and PhotoModal
@@ -28,16 +33,35 @@ const PhotoGalleryStack = () => {
   );
 };
 
-// Placeholder stack for Weather App
-const WeatherAppStack = () => {
+// Create the Forecast Tab Navigator
+const ForecastTabNavigator = createMaterialTopTabNavigator();
+
+const ForecastTabs = () => {
   return (
-    <Stack.Navigator>
-      <Stack.Screen name="WeatherApp" component={WeatherAppScreen} options={{ title: 'Weather App' }} />
-    </Stack.Navigator>
+    <ForecastTabNavigator.Navigator>
+      <ForecastTabNavigator.Screen name="Forecast-3Day" component={ForecastScreen} initialParams={{ days: 3 }} />
+      <ForecastTabNavigator.Screen name="Forecast-5Day" component={ForecastScreen} initialParams={{ days: 5 }} />
+    </ForecastTabNavigator.Navigator>
   );
 };
 
-// Create the Drawer Navigator
+// Create the Drawer Navigator for Weather App
+const WeatherAppDrawer = createDrawerNavigator();
+
+const WeatherAppStack = () => {
+  return (
+    <WeatherAppDrawer.Navigator
+      screenOptions={{
+        drawerPosition: 'left', // Set the drawer to open from the left
+      }}
+    >
+      <WeatherAppDrawer.Screen name="Current Weather" component={CurrentWeatherScreen} />
+      <WeatherAppDrawer.Screen name="Forecast" component={ForecastTabs} />
+    </WeatherAppDrawer.Navigator>
+  );
+};
+
+// Create the Main Drawer Navigator
 const Drawer = createDrawerNavigator();
 
 const App = () => {
@@ -58,4 +82,5 @@ const App = () => {
 };
 
 export default App;
+
 
