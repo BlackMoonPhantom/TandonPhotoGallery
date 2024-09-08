@@ -1,94 +1,46 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity, TextInput, StyleSheet, Modal } from 'react-native';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import PhotoGalleryScreen from './screens/PhotoGalleryScreen';
+import PhotoDetailScreen from './screens/PhotoDetailScreen';
+import PhotoModalScreen from './screens/PhotoModalScreen';
 
-interface ImageData {
-  id: number;
-  url: string;
-}
+export type RootStackParamList = {
+  PhotoGallery: undefined;
+  PhotoDetail: { id: number; url: string };
+  PhotoModal: { url: string };
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const App = () => {
-  const [imageData] = useState<ImageData[]>(() => {
-    const data: ImageData[] = [];
-    for (let i = 1; i < 70; i++) {
-      data.push({ id: i, url: `https://picsum.photos/id/${i}/200` });
-    }
-    return data;
-  });
-
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedImage, setSelectedImage] = useState<ImageData | null>(null);
-
-  const filteredImages = imageData.filter(image => image.id.toString().includes(searchTerm));
-
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search by ID"
-        value={searchTerm}
-        onChangeText={setSearchTerm}
-      />
-      <FlatList
-        data={filteredImages}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={3}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => setSelectedImage(item)}>
-            <Image source={{ uri: item.url }} style={styles.imageThumbnail} />
-          </TouchableOpacity>
-        )}
-      />
-      {selectedImage && (
-        <Modal
-          transparent={true}
-          visible={true}
-          onRequestClose={() => setSelectedImage(null)}
-        >
-          <TouchableOpacity style={styles.modalContainer} onPress={() => setSelectedImage(null)}>
-            <Image source={{ uri: selectedImage.url }} style={styles.fullScreenImage} />
-          </TouchableOpacity>
-        </Modal>
-      )}
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="PhotoGallery" component={PhotoGalleryScreen} options={{ title: 'Photo Gallery' }} />
+        <Stack.Screen
+          name="PhotoDetail"
+          component={PhotoDetailScreen}
+          options={({ route }) => ({
+            title: route.params.url,
+            headerShown: true, // Ensure header is shown
+          })}
+        />
+        <Stack.Screen
+          name="PhotoModal"
+          component={PhotoModalScreen}
+          options={{
+            presentation: 'modal',
+            headerShown: true, // Ensure header is shown
+            headerStyle: { backgroundColor: 'black' },
+            headerTintColor: 'white',
+            headerTitleStyle: { color: 'black' },
+            headerBackTitleVisible: false,
+          }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
 
 export default App;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: 50,
-    alignItems: 'center', // Center content horizontally
-  },
-  searchInput: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingLeft: 10,
-    marginBottom: 10,
-    marginHorizontal: 10,
-    width: '90%', // Adjust the width to make it look centered
-  },
-  imageThumbnail: {
-    width: 100,
-    height: 100,
-    margin: 5,
-  },
-  flatListContainer: {
-    justifyContent: 'center', // Center the grid items
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'black',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  fullScreenImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
-  },
-});
